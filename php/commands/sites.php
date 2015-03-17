@@ -40,7 +40,7 @@ class Sites_Command extends Terminus_Command {
       $report = array(
         'name' => $site->getName(),
       );
-      
+
       $fields = Input::optional('fields', $assoc_args, 'name,framework,service_level,id');
       $filter = Input::optional('filter', $assoc_args, false);
       if ($filter) {
@@ -54,10 +54,10 @@ class Sites_Command extends Terminus_Command {
       }
       if ($fields) {
         $fields = explode(',',$fields);
-        foreach ($fields as $field) { 
+        foreach ($fields as $field) {
           $report[$field] = $site->info($field);
         }
-      } else { 
+      } else {
         $info = $site->info();
         foreach ($info as $key=>$value) {
           $report[$key] = $value;
@@ -333,7 +333,24 @@ class Sites_Command extends Terminus_Command {
       sort($data);
       $this->handleDisplay($data);
     } else {
-      Terminus::line('No sites in need up updating.');
+      if($upstream) {
+        // If $upstream && json output
+        if(Terminus::get_config('json')) {
+          $data[$upstream] = array('Sites'=>'There are no sites to update with the upstream '.$upstream);
+        } else {
+          Terminus::line('There are no sites to update with the upstream '.$upstream);
+        }
+      } else {
+        // if !$upstream
+        if(Terminus::get_config('json')) {
+          $data['status']= array('Sites'=>'There are no sites in need up updating.');
+        } else {
+          Terminus::line('No sites in need up updating.');
+        }
+      }
+      if(Terminus::get_config('json')) {
+        $this->handleDisplay($data);
+      }
     }
   }
 }

@@ -204,6 +204,7 @@ abstract class Terminus_Command {
   }
 
   protected function handleDisplay($data,$args = array(), $headers = null) {
+    xdebug_break();
     if (array_key_exists("json", $args) OR Terminus::get_config('json') )
       echo \Terminus\Utils\json_dump($data);
     else if (array_key_exists("bash", $args) OR Terminus::get_config('bash'))

@@ -191,9 +191,6 @@ class Site_Command extends Terminus_Command {
   * [--site=<site>]
   * : name of the site
   *
-  * [--env=<env>]
-  * : site environment
-  *
   * [--set=<value>]
   * : set connection to sftp or git
   *
@@ -201,6 +198,7 @@ class Site_Command extends Terminus_Command {
   */
   public function connection_mode($args, $assoc_args) {
     $site = SiteFactory::instance(Input::site($assoc_args));
+    // $env = 'dev';
     $action = 'show';
     $mode = @$assoc_args['set'] ?: false;
     if (@$assoc_args['set']) {
@@ -219,8 +217,15 @@ class Site_Command extends Terminus_Command {
         if (!$mode) {
           Terminus::error("You must specify the mode with --set=<sftp|git>");
         }
-        $data = $site->environment($env)->onServerDev($mode);
-        Terminus::success("Successfully changed connection mode to $mode");
+        $site->environment($env)->onServerDev($mode);
+        $data = $site->environment($env)->onServerDev();
+        $new_mode = (isset($data->enabled) && (int)$data->enabled===1) ? 'Sftp' : 'Git';
+        if($new_mode == $mode) {
+          Terminus::success("Successfully changed connection mode to $mode");
+        } else {
+          Terminus::error("Connection mode to $mode failed. The connection current mode is $new_mode.".PHP_EOL." Please note that you cannot enable SFTP on Test or Live environments.");
+        }
+        // Terminus::success("Successfully changed connection mode to $mode");
         break;
     }
     return $data;
@@ -338,7 +343,7 @@ class Site_Command extends Terminus_Command {
     if (empty($orgs)) {
       Terminus::error("No organizations");
     }
-    
+
     // format the data
     foreach ($orgs as $org) {
       $data[] = array(
@@ -482,7 +487,7 @@ class Site_Command extends Terminus_Command {
         break;
       case 'create':
         if (!array_key_exists('element',$assoc_args)) {
-          $assoc_args['element'] = Input::menu(array('code','db','files','all'), 'all', "Select element"); 
+          $assoc_args['element'] = Input::menu(array('code','db','files','all'), 'all', "Select element");
         }
         $result = $site->environment($env)->createBackup($assoc_args);
         if ($result) {
@@ -501,7 +506,7 @@ class Site_Command extends Terminus_Command {
           $date = 'Pending';
           if (isset($backup->finish_time)) {
             $date = date("Y-m-d H:i:s", $backup->finish_time);
-          } 
+          }
           $data[] = array(
             $backup->filename,
             sprintf("%dMB", $backup->size / 1024 / 1024),

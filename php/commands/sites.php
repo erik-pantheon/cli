@@ -288,6 +288,7 @@ class Sites_Command extends Terminus_Command {
         // No updates, go back to start.
         continue;
       }
+
       // Check for upstream argument and site upstream URL match.
       $siteUpstream = $site->info('upstream');
       if ( $upstream AND isset($siteUpstream->url)) {
@@ -304,7 +305,7 @@ class Sites_Command extends Terminus_Command {
         $xoption = Input::optional($assoc_args, 'xoption', 'theirs');
         if (!$report) {
           $confirmed = Input::yesno("Apply upstream updatefs to %s ( run update.php:%s, xoption:%s ) ", $assoc_args, array($site->getName(), var_export($update,1), var_export($xoption,1)));
-          if( !$confirmed ) continue; // Suer says No, go back to start.
+          if( !$confirmed ) continue; // User says No, go back to start.
 
           // Backup the DB so the client can restore if something goes wrong.
           Terminus::line('Backing up '.$site->getName().'.');
@@ -336,7 +337,7 @@ class Sites_Command extends Terminus_Command {
       if($upstream) {
         // If $upstream && json output
         if(Terminus::get_config('json')) {
-          $data[$upstream] = array('Sites'=>'There are no sites to update with the upstream '.$upstream);
+          $data['Sites'] = 'There are no sites to update with the upstream '.$upstream;
         } else {
           Terminus::line('There are no sites to update with the upstream '.$upstream);
         }

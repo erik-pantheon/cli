@@ -152,6 +152,7 @@ class Terminus {
    * @param string $message
    */
   static function line( $message = '', $params = array() ) {
+    if (Terminus::get_config('json')) { return True; }
     if ( !empty($params) ) {
       $message = vsprintf($message, $params);
     }
